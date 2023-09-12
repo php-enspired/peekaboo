@@ -1,0 +1,40 @@
+{
+  "name": "php-enspired/peekaboo",
+  "description": "message formatting utilities using ICU, with a fallback on basic string templating.",
+  "type": "library",
+  "homepage": "http://php.enspi.red",
+  "license": "GPL-3.0-only",
+  "authors": [
+    {
+      "name": "Adrian",
+      "email": "adrian@enspi.red",
+      "homepage": "http://enspi.red"
+    }
+  ],
+  "support": {
+    "email": "peekaboo@php.enspi.red",
+    "irc": "irc://irc.libera.chat/php-enspired",
+    "chat": "https://web.libera.chat/#php-enspired",
+    "source": "https://github.com/php-enspired/peekaboo"
+  },
+  "require": {
+    "php": "^8.1"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^10",
+    "phan/phan": "^5.4"
+  },
+  "autoload": {
+    "psr-4": {
+      "at\\peekaboo\\": "src/"
+    }
+  },
+  "scripts": {
+    "build:dist": "bin/build-dist",
+    "build:locales": "genrb resources/language/*.txt -d resources/language/",
+    "test:analyze": "vendor/bin/phan",
+    "test:unit" : "vendor/bin/phpunit tests",
+    "wiki:update": "git subtree push --prefix docs wiki master",
+    "wiki:update-docs": "git subtree pull --prefix docs wiki master --squash --message='Merge wiki updates into docs'"
+  }
+}
