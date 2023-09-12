@@ -23,7 +23,7 @@ use Exception;
 
 /**
  * Messaging errors.
- * Looks like an Exceptable but isn't (circular dependencies).
+ * Not using Exceptable to avoid circular dependencies.
  */
 class MessageError extends Exception {
 
@@ -43,13 +43,13 @@ class MessageError extends Exception {
 
 /**
  * Error cases.
- * Looks like an ErrorCase but isn't (circular dependencies).
+ * Not using ErrorCase to avoid circular dependencies.
  */
 enum MessageErrorCase : int {
 
-  case NO_MESSAGES = 0;
-  case NOT_A_MESSAGE = 1;
-  case FORMAT_MESSAGE_FAILED = 2;
+  case NO_MESSAGES = 1;
+  case NOT_A_MESSAGE = 2;
+  case FORMAT_MESSAGE_FAILED = 3;
 
   /**
    * Constructs and throws an exception based on this error case.
