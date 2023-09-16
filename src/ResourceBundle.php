@@ -17,25 +17,30 @@
  *  If not, see <http://www.gnu.org/licenses/gpl-3.0.txt>.
  */
 declare(strict_types = 1);
-namespace at\peekaboo;
 
-use ResourceBundle;
-
-use at\peekaboo\MessageError;
+// if intl is loaded, then the autoloader shouldn't even try us. but just in case.
+if (extension_loaded("intl")) {
+  return;
+}
 
 /**
- * For classes that build ICU messages.
+ * @internal
+ * @see https://php.net/ResourceBundle
+ *
+ * This is a stub/fallback for internal usage when ext/intl is not loaded.
+ * ResourceBundle->getErrorCode() and ->getErrorMessage() always tell you "no error."
+ * Other methods are not emulated.
  */
-interface HasMessages {
+abstract class ResourceBundle {
 
-  /**
-   * Finds and builds a message with the given key and context, if one exists.
-   *
-   * @param string $key Message identifier
-   * @param array $context Contextual information for message replacements
-   * @throws MessageError NO_MESSAGES if no matching message is found
-   * @throws MessageError NOT_A_MESSAGE if key is found but is not a formatting string
-   * @return string Formatted message on success
-   */
-  public function message(string $key, array $context) : string;
+  public function getErrorCode() : int {
+    return 0;
+  }
+
+  public function getErrorMessage() : string {
+    return "U_ZERO_ERROR";
+  }
+
+  abstract public function count() : int;
+  abstract public function get($key, bool $fallback = true) : mixed;
 }

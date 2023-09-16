@@ -19,6 +19,7 @@
 declare(strict_types = 1);
 namespace at\peekaboo;
 
+// If intl is not loaded, PSR-0 will find a stub version of the class.
 use ResourceBundle;
 
 use at\peekaboo\ {
@@ -27,8 +28,40 @@ use at\peekaboo\ {
 };
 
 /**
- * Provides ICU message formatting support.
+ * For classes that build ICU messages.
+ *
+ * To provide a fallback message bundle, define a const array MESSAGES
  */
+trait MakesMessages {
+
+  /** {@inheritDoc} */
+  public static function messageBundle() : MessageBundle {
+    if (defined("static::MESSAGES")) {
+      if (! is_array(static::MESSAGES)) {
+        MessageError::E::BAD_MESSAGES_CONST->throw(["type" => get_debug_type(static::MESSAGES)]);
+      }
+
+      return new MessageBundle(static::MESSAGES);
+    }
+
+    return new MessageBundle([]);
+  }
+
+  /** {@inheritDoc} */
+  public function message(string $key, array $context) : string {
+    assert($this instanceof HasMessages);
+    $registry = $this->messageRegistry();
+    return $registry::formatMessage($key, $context) ??
+      $registry::formatMessageFor($this, $key, $context) ??
+      MessageError::E::NO_MESSAGES->throw([
+        "registry" => $registry::class,
+        "class" => static::class,
+        "key" => $key
+      ]);
+  }
+}
+
+
 trait MakesMessages {
 
   /** @var string Preferred locale for messages. */
@@ -161,12 +194,10 @@ trait MakesMessages {
       "object" => $value::class . ":" . (
         method_exists($value, "__toString") ?
           $value->__toString() :
-          json_encode($value, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR)
+          json_encode($value, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
       ),
-      "array", "boolean", "null" => json_encode(
-        $value,
-        JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR
-      ),
+      "array", "boolean", "null" =>
+        json_encode($value, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE),
       "resource", "resource (closed)" => get_resource_type($value) . "#" . get_resource_id($value),
       default => null
     };

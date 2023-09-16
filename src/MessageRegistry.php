@@ -31,17 +31,122 @@ use at\peekaboo\ {
 /**
  * Wraps ICU message bundles and formatting process.
  *
- * Use of this class requires the intl extension,
- *  and will fail gracefully if not enabled with the exception of the `register()` method
- *  (though note, you won't be able to call `register()` with the proper args if intl is not enabled).
+ * Looks for message formats first in registered bundles,
+ *  then in a registered root bundle,
+ *  then on the calling class's bundle.
+ *
+ * Use of intl features will fail gracefully if the extension is not enabled.
+ */
+class MessageRegistry {
+
+  /**
+   * Sets the default locale for messages.
+   *
+   * @param string $defaultLocale The default locale to use
+   */
+  public static function setDefaultLocale(string $defaultLocale) : void;
+
+  /**
+   * Gets the default locale, setting it to "en" if not already configured.
+   *
+   * @return string The default locale
+   */
+  public function defaultLocale() : string;
+
+  /**
+   * Gets the current locale for messages.
+   *
+   * @return string The current locale
+   */
+  public function locale() : string;
+
+  /**
+   * Sets up localized message support for the concrete implementation(s).
+   *
+   * @param string           $locale   Preferred locale
+   * @param ?ResourceBundle $messages Message format patterns
+   */
+  public static function localize(string $locale, ResourceBundle $messages = null) : void;
+
+
+  /** {@inheritDoc} */
+  protected static function findFormat() : ? string {}
+
+  /**
+   * Looks up and formats the message identified by key, using the given locale and context.
+   *
+   * @param string $key Dot-delimited key path to target message
+   * @param array $context Contextual replacements
+   * @param ?string $locale Target message locale
+   * @throws MessageError E::FORMAT_MESSAGE_FAILED on error
+   * @return string|null Formatted message on success
+   */
+  public static function formatMessage(string $key, array $context, string $locale = null) : ? string {
+    $format = self::findFormat($key);
+    if (empty($format)) {
+      return null;
+    }
+
+    $locale ??= static::defaultLocale($object);
+    $formatter = new MessageFormatter($locale, $format);
+    return $formatter->format($context) ?:
+      MessageError::E::FORMAT_MESSAGE_FAILED->throw([
+        "error_code" => $formatter->getErrorCode(),
+        "error_message" => $formatter->getErrorMessage(),
+        "class" => static::class,
+        "key" => $key,
+        "locale" => $locale,
+        "format" => $format,
+        "context" => json_encode($context, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
+      ]);
+  }
+
+  /** {@inheritDoc} */
+  public static function localize() : void {}
+
+  public static function register(ResourceBundle $messages) : void {
+    static::$messages[] = $messages;
+  }
+
+  /** {@inheritDoc} */
+  protected static function findFormat() : ? string {}
+
+  /** {@inheritDoc} */
+  protected static function substituteMessage() : string {}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/**
+ * Wraps ICU message bundles and formatting process.
+ *
+ * Use of intl features will fail gracefully if the extension is not enabled.
  *
  * @internal For use by MakesMessages::localize() and ::makeMessage()
  */
 class MessageRegistry {
 
-  protected static ResourceBundle $defaultMessages;
+  protected static ? ResourceBundle $defaultMessages = null;
   protected static string $defaultLocale = "en";
-  protected static Store $messages;
+  protected static ? Store $messages = null;
 
   public static function findMessage(
     HasMessages $object,
@@ -64,7 +169,7 @@ class MessageRegistry {
         "key" => $key,
         "locale" => $locale,
         "format" => $format,
-        "context" => json_encode($context, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR)
+        "context" => json_encode($context, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
       ]);
   }
 
