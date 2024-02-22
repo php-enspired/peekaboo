@@ -20,57 +20,37 @@ declare(strict_types = 1);
 namespace at\peekaboo;
 
 use MessageFormatter,
-  ResourceBundle,
-  SplObjectStorage as Store;
+  ResourceBundle;
 
-use at\peekaboo\ {
-  HasMessages,
-  MessageError
-};
+use at\peekaboo\MessageError;
 
 /**
- * Wraps ICU message bundles and formatting process.
- *
- * Looks for message formats first in registered bundles,
- *  then in a registered root bundle,
- *  then on the calling class's bundle.
+ * Wraps ICU message bundles and formatting process;
+ *  serves as a centralized place to register and access message bundles.
  *
  * Use of intl features will fail gracefully if the extension is not enabled.
  */
 class MessageRegistry {
 
-  /**
-   * Sets the default locale for messages.
-   *
-   * @param string $defaultLocale The default locale to use
-   */
-  public static function setDefaultLocale(string $defaultLocale) : void;
+  /** @var string The "root" locale name. */
+  protected const ROOT_LOCALE = "root";
+
+  /** @var string|null The default locale to use for message lookups/formatting. */
+  public static ? string $defaultLocale = null;
+
+  /** @var array Available message bundles, grouped by locale. */
+  protected static array $messages = [];
 
   /**
-   * Gets the default locale, setting it to "en" if not already configured.
+   * Sets up a resource bundle for a given locale.
+   * If no default locale/bundle is registered, the first-registered locale+bundle will be used.
    *
-   * @return string The default locale
-   */
-  public function defaultLocale() : string;
-
-  /**
-   * Gets the current locale for messages.
-   *
-   * @return string The current locale
-   */
-  public function locale() : string;
-
-  /**
-   * Sets up localized message support for the concrete implementation(s).
-   *
-   * @param string           $locale   Preferred locale
+   * @param string $locale Preferred locale
    * @param ?ResourceBundle $messages Message format patterns
    */
-  public static function localize(string $locale, ResourceBundle $messages = null) : void;
-
-
-  /** {@inheritDoc} */
-  protected static function findFormat() : ? string {}
+  public static function localize(string $locale, ResourceBundle $messages = null) : void {
+    static::$messages[$locale][] = $messages;
+  }
 
   /**
    * Looks up and formats the message identified by key, using the given locale and context.
@@ -78,118 +58,70 @@ class MessageRegistry {
    * @param string $key Dot-delimited key path to target message
    * @param array $context Contextual replacements
    * @param ?string $locale Target message locale
-   * @throws MessageError E::FORMAT_MESSAGE_FAILED on error
+   * @throws MessageException MessageError::FormatFailed on error
    * @return string|null Formatted message on success
    */
-  public static function formatMessage(string $key, array $context, string $locale = null) : ? string {
-    $format = self::findFormat($key);
+  public static function message(string $key, array $context, string $locale = null) : ? string {
+    $locale ??= static::$defaultLocale ?? static::ROOT_LOCALE;
+    $format = static::findFormat($key, $locale);
     if (empty($format)) {
       return null;
     }
 
-    $locale ??= static::defaultLocale($object);
-    $formatter = new MessageFormatter($locale, $format);
-    return $formatter->format($context) ?:
-      MessageError::E::FORMAT_MESSAGE_FAILED->throw([
-        "error_code" => $formatter->getErrorCode(),
-        "error_message" => $formatter->getErrorMessage(),
-        "class" => static::class,
-        "key" => $key,
-        "locale" => $locale,
-        "format" => $format,
-        "context" => json_encode($context, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
-      ]);
+    return static::formatMessage($locale, $format, $context);
   }
 
-  /** {@inheritDoc} */
-  public static function localize() : void {}
-
-  public static function register(ResourceBundle $messages) : void {
-    static::$messages[] = $messages;
-  }
-
-  /** {@inheritDoc} */
-  protected static function findFormat() : ? string {}
-
-  /** {@inheritDoc} */
-  protected static function substituteMessage() : string {}
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/**
- * Wraps ICU message bundles and formatting process.
- *
- * Use of intl features will fail gracefully if the extension is not enabled.
- *
- * @internal For use by MakesMessages::localize() and ::makeMessage()
- */
-class MessageRegistry {
-
-  protected static ? ResourceBundle $defaultMessages = null;
-  protected static string $defaultLocale = "en";
-  protected static ? Store $messages = null;
-
-  public static function findMessage(
-    HasMessages $object,
-    string $key,
-    array $context,
-    string $locale = null
-  ) : ? string {
-    $format = static::findMessageFormat($object, $key);
+  /**
+   * Looks up and formats the message identified by key, using the given locale and context.
+   *
+   * @param string $key Dot-delimited key path to target message
+   * @param array $context Contextual replacements
+   * @param ?string $locale Target message locale
+   * @throws MessageException MessageError::FormatFailed on error
+   * @return string|null Formatted message on success
+   */
+  public static function messageFrom(ResourceBundle $messages, string $key, array $context, string $locale = null) : ? string {
+    $locale ??= static::$defaultLocale ?? static::ROOT_LOCALE;
+    $format = static::findFormatIn($messages, $locale);
     if (empty($format)) {
       return null;
     }
 
-    $locale ??= static::defaultLocale($object);
-    $formatter = new MessageFormatter($locale, $format);
-    return $formatter->format($context) ?:
-      MessageError::E::FORMAT_MESSAGE_FAILED->throw([
-        "error_code" => $formatter->getErrorCode(),
-        "error_message" => $formatter->getErrorMessage(),
-        "class" => static::class,
-        "key" => $key,
-        "locale" => $locale,
-        "format" => $format,
-        "context" => json_encode($context, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
-      ]);
+    return static::formatMessage($locale, $format, $context);
   }
 
-  protected static function defaultLocale(HasMessages $object) : string {
-    if (empty(static::$messages) || ! static::$messages->contains($object)) {
-      return static::$defaultLocale;
+  /**
+   * Finds a message format string for the given locale.
+   * Falls back on the root locale if needed.
+   *
+   * @param string $key Dot-delimited key path to target message
+   * @param string $locale Target message locale
+   * @throws MessageException MessageError::NotAMessage if key exists but is not a formatting string
+   * @return string|null Formatting message if found; null otherwise
+   */
+  protected static function findFormat(string $key, string $locale) : ? string {
+    if (! empty(static::$messages)) {
+      foreach (static::$messages[$locale] ?? reset(static::$messages) as $messages) {
+        $format = static::findFormatIn($messages, $locale);
+        if (isset($format)) {
+          return $format;
+        }
+      }
     }
 
-    return static::$messages->offsetGet($object)->defaultLocale;
+    return null;
   }
 
-  protected static function findMessageFormat(HasMessages $object, string $key) : ? string {
-    if (isset(static::$messages) && static::$messages->contains($object)) {
-      $message = static::$messages->offsetGet($object)->messages;
-    } elseif (isset(static::$defaultMessages)) {
-      $message = static::$defaultMessages;
-    } else {
-      return null;
-    }
-
+  /**
+   * Finds a message format string in a message bundle.
+   *
+   * @param ResourceBundle $messages The message bundle to look in
+   * @param string $key Dot-delimited key path to target message
+   * @throws MessageException MessageError::NotAMessage if key exists but is not a formatting string
+   * @return string|null Formatting message if found; null otherwise
+   */
+  protected static function findFormatIn(ResourceBundle $messages, string $key) : ? string {
+    $message = $messages;
     foreach (explode(".", $key) as $next) {
       // more keys but no more message bundles means not found
       if (! $message instanceof ResourceBundle) {
@@ -198,33 +130,31 @@ class MessageRegistry {
 
       $message = $message->get($next);
     }
-
     if (! is_string($message)) {
-      MessageError::E::NOT_A_MESSAGE->throw(["class" => static::class, "key" => $key]);
+      throw (MessageError::NotAMessage)(["bundle" => $messages::class, "key" => $key]);
     }
 
     return $message;
   }
 
-  public static function register(
-    HasMessages $object,
-    ResourceBundle $messages,
-    string $defaultLocale = "en"
-  ) : void {
-    static::$messages ??= new Store();
-    static::$messages->attach(
-      $object,
-      new class($messages, $defaultLocale) {
-        public function __construct(
-          public readonly ResourceBundle $messages,
-          public readonly string $defaultLocale
-        ) {}
-      }
-    );
-  }
-
-  public static function registerDefault(ResourceBundle $messages, string $defaultLocale = "en") : void {
-    static::$defaultMessages = $messages;
-    static::$defaultLocale = $defaultLocale;
+  /**
+   * Formats a message.
+   *
+   * @param string $locale Target message locale
+   * @param string $format Message formatting string
+   * @param array $context Contextual replacements
+   * @throws MessageException MessageError::FormatFailed on error
+   * @return string|null Formatted message on success
+   */
+  protected static function formatMessage(string $locale, string $format, array $context) : ? string {
+    $formatter = new MessageFormatter($locale, $format);
+    return $formatter->format($context) ?:
+      throw (MessageError::FormatFailed)([
+        "error_code" => $formatter->getErrorCode(),
+        "error_message" => $formatter->getErrorMessage(),
+        "locale" => $locale,
+        "format" => $format,
+        "context" => $context
+      ]);
   }
 }

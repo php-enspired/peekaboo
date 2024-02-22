@@ -29,6 +29,9 @@ use ResourceBundle;
  * Note, if ext/intl is not loaded, not all expected methods will be available -
  *  and even when intl _is_ available, some native ResourceBundle methods will error if used.
  * Users are very strongly advised to rely only on the methods defined here.
+ *
+ * Only defined if ext/intl isn't loaded.
+ * @phan-suppress PhanRedefinedExtendedClass
  */
 class MessageBundle extends ResourceBundle {
 

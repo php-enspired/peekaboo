@@ -19,9 +19,7 @@
 declare(strict_types = 1);
 namespace at\peekaboo;
 
-use ResourceBundle;
-
-use at\peekaboo\MessageError;
+use at\peekaboo\MessageException;
 
 /**
  * For classes that build ICU messages.
@@ -33,9 +31,9 @@ interface HasMessages {
    *
    * @param string $key Message identifier
    * @param array $context Contextual information for message replacements
-   * @throws MessageError NO_MESSAGES if no matching message is found
-   * @throws MessageError NOT_A_MESSAGE if key is found but is not a formatting string
+   * @throws MessageException MessageError::NoMessages if no matching message is found
+   * @throws MessageException MessageError::NotAMessage if key is found but is not a formatting string
    * @return string Formatted message on success
    */
-  public function message(string $key, array $context) : string;
+  public function makeMessage(string $key, array $context) : string;
 }

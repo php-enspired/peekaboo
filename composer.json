@@ -22,9 +22,13 @@
   },
   "require-dev": {
     "phpunit/phpunit": "^10",
-    "phan/phan": "^5.4"
+    "phan/phan": "^5.4.3"
   },
   "autoload": {
+    "files": [
+      "stubs/exceptable.php",
+      "stubs/intl.php"
+    ],
     "psr-0": { "": "src/" },
     "psr-4": {
       "at\\peekaboo\\": "src/",

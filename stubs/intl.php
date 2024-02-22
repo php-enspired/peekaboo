@@ -18,10 +18,13 @@
  */
 declare(strict_types = 1);
 
-// if intl is loaded, then the autoloader shouldn't even try us. but just in case.
+// if intl is loaded, these are unneeded.
 if (extension_loaded("intl")) {
   return;
 }
+
+use at\peekaboo\MessageFormatter as PeekabooMessageFormatter;
+require_once __DIR__ . "/MessageFormatter.php";
 
 /**
  * @internal
@@ -30,6 +33,9 @@ if (extension_loaded("intl")) {
  * This is a stub/fallback for internal usage when ext/intl is not loaded.
  * ResourceBundle->getErrorCode() and ->getErrorMessage() always tell you "no error."
  * Other methods are not emulated.
+ *
+ * Only defined if ext/intl is not loaded.
+ * @phan-suppress PhanRedefineClassInternal
  */
 abstract class ResourceBundle {
 
@@ -44,3 +50,13 @@ abstract class ResourceBundle {
   abstract public function count() : int;
   abstract public function get($key, bool $fallback = true) : mixed;
 }
+
+/**
+ * @internal
+ *
+ * This aliases our stub/fallback for internal usage when ext/intl is not loaded.
+ *
+ * @phan-suppress PhanAccessClassInternal
+ * @phan-suppress PhanRedefineClassInternal
+ */
+class MessageFormatter extends PeekabooMessageFormatter {}

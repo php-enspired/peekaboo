@@ -16,73 +16,52 @@
  *  You should have received a copy of the GNU General Public License along with this program.
  *  If not, see <http://www.gnu.org/licenses/gpl-3.0.txt>.
  */
-declare(strict_types = 1);
 namespace at\peekaboo;
 
-use Exception;
+use Throwable;
 
-/**
- * Messaging errors.
- * Not using Exceptable to avoid circular dependencies.
- */
-class MessageError extends Exception {
+use at\exceptable\ {
+  Error,
+  Exceptable
+};
 
-  const E = MessageErrorCase::class;
+use at\peekaboo\ {
+  MakesMessages,
+  MessageException
+};
 
-  public function __construct(string $message, int $code) {
-    parent::__construct($message, $code);
-    $frame = $this->getTrace()[0] ?? null;
-    if (isset($frame)) {
-      // @phan-suppress-next-line PhanAccessPropertyProtected
-      $this->file = $frame["file"];
-      // @phan-suppress-next-line PhanAccessPropertyProtected
-      $this->line = $frame["line"];
-    }
-  }
-}
+/** @phan-suppress PhanInvalidConstantExpression */
+enum MessageError : int implements Error {
+  use MakesMessages;
 
-/**
- * Error cases.
- * Not using ErrorCase to avoid circular dependencies.
- */
-enum MessageErrorCase : int {
+  case UnknownError = 0;
+  case NoMessages = 1;
+  case NotAMessage = 2;
+  case FormatFailed = 3;
 
-  case NO_MESSAGES = 1;
-  case NOT_A_MESSAGE = 2;
-  case FORMAT_MESSAGE_FAILED = 3;
+  public const MESSAGES = [
+    self::UnknownError->name => "unknown error",
+    self::NoMessages->name => "no messages provided for {class}",
+    self::NotAMessage->name => "value at {bundle}:{key} is not a message format string",
+    self::FormatFailed->name => "error formatting message: ({error_code}) {error_message}\n" .
+      "locale: {locale}\n" .
+      "format: {format}\n" .
+      "context: {context}"
+  ];
 
-  /**
-   * Constructs and throws an exception based on this error case.
-   *
-   * @param array $context Substitution map for the error message
-   */
-  public function throw(array $context = []) : void {
-    throw new MessageError($this->message($context), $this->value);
+  public function __invoke(array $context = [], Throwable $previous = null) : Exceptable {
+    return new MessageException($this, $context, $previous);
   }
 
-  /**
-   * Formats an error message for this case, making substitutions from context.
-   *
-   * @param string[] $context Substitution map for the error message
-   * @return string Formatted message
-   */
-  protected function message(array $context) : string {
-    $format = match($this->value) {
-      self::NO_MESSAGES => "no messages provided for {class}",
-      self::NOT_A_MESSAGE => "value at {class}:{key} is not a message format string\n",
-      self::FORMAT_MESSAGE_FAILED => "error formatting message '{class}:{key}': ({error_code}) {error_message}\n" .
-        "locale: {locale}\n" .
-        "format: {format}\n" .
-        "context: {context}"
-    };
+  public function code() : int {
+    return $this->value;
+  }
 
-    $substitutions = [];
-    foreach ($context as $find => $replace) {
-      if (is_string($replace)) {
-        $substitutions["{{$find}}"] = $replace;
-      }
-    }
+  public function message(array $context) : string {
+    return $this->makeMessage($this->name, $context);
+  }
 
-    return strtr("[{$this->value}] {$this->name}: {$format}", $substitutions);
+  public function newExceptable(array $context = [], Throwable $previous = null) : Exceptable {
+    return new MessageException($this, $context, $previous);
   }
 }

@@ -1,7 +1,6 @@
 <?php
 /**
  * @package    at.peekaboo
- * @subpackage tests
  * @author     Adrian <adrian@enspi.red>
  * @copyright  2023
  * @license    GPL-3.0 (only)
@@ -17,20 +16,8 @@
  *  You should have received a copy of the GNU General Public License along with this program.
  *  If not, see <http://www.gnu.org/licenses/gpl-3.0.txt>.
  */
-declare(strict_types = 1);
-namespace at\peekaboo\tests;
+namespace at\peekaboo;
 
-use ResourceBundle;
+use at\exceptable\Spl\RuntimeException;
 
-use at\peekaboo\ {
-  HasMessages,
-  MakesMessages
-};
-
-use at\peekaboo\tests\TestCase;
-
-/** Tests for the MakesMessages trait. */
-class MakesMessageTest extends TestCase {
-
-  //
-}
+class MessageException extends RuntimeException {}

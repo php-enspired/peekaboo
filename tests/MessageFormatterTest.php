@@ -21,7 +21,6 @@ declare(strict_types = 1);
 namespace at\peekaboo\tests;
 
 use at\peekaboo\MessageFormatter;
-
 use at\peekaboo\tests\TestCase;
 
 /** Tests for the MessageFormatter class. */
@@ -62,7 +61,7 @@ class MessageFormatterTest extends TestCase {
       ],
       "escaped single quote" => [
         "well that wasn''t expected",
-        ["token" => "world"],
+        [],
         "well that wasn't expected"
       ],
       "escaped braces" => [

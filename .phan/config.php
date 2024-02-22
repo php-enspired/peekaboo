@@ -1,6 +1,6 @@
 <?php
 
 return [
-  'directory_list' => ['src', 'vendor'],
-  'exclude_analysis_directory_list' => ['vendor']
+  'directory_list' => ['src', 'stubs', 'vendor'],
+  'exclude_analysis_directory_list' => ['stubs', 'vendor']
 ];
