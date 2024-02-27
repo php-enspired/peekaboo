@@ -86,6 +86,7 @@ namespace at\exceptable\Spl {
         Throwable $previous = null
       ) {
         $this->error ??= MessageError::UnknownError;
+        parent::__construct($this->error->message($context), $this->error->code(), $previous);
       }
 
       public function context() : array {

@@ -38,6 +38,7 @@ enum MessageError : int implements Error {
   case NoMessages = 1;
   case NotAMessage = 2;
   case FormatFailed = 3;
+  case BadMessages = 4;
 
   public const MESSAGES = [
     self::UnknownError->name => "unknown error",
@@ -46,7 +47,8 @@ enum MessageError : int implements Error {
     self::FormatFailed->name => "error formatting message: ({error_code}) {error_message}\n" .
       "locale: {locale}\n" .
       "format: {format}\n" .
-      "context: {context}"
+      "context: {context}",
+    self::BadMessages->name => "MakesMessages::MESSAGES must be an array; {type} declared"
   ];
 
   public function __invoke(array $context = [], Throwable $previous = null) : Exceptable {
@@ -58,6 +60,12 @@ enum MessageError : int implements Error {
   }
 
   public function message(array $context) : string {
+    $f = self::MESSAGES[$this->name];
+    foreach ($context as $k => $v) {
+      $r["{{$k}}"] = $v;
+    }
+    return strtr($f, $r);
+
     return $this->makeMessage($this->name, $context);
   }
 

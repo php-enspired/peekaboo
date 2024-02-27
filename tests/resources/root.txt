@@ -1,0 +1,13 @@
+root {
+  top-level-key { "hello, world" }
+  nested {
+    key { "hello again, world" }
+  }
+  simple-replacement { "hello, {name}" }
+  escaped-characters { "this isn''t '{obvious}'" }
+  predefined-styles {
+    date-medium { "one small step for man on {footprint, date, medium}" }
+    number-currency { "that will set you back about {price, number, ::compact-short currency/USD}" }
+    number-integer-width { "agent {id, number, ::integer-width/*000}" }
+  }
+}

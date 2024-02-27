@@ -29,7 +29,9 @@ use at\peekaboo\ {
 /**
  * For classes that build ICU messages.
  *
- * To provide a fallback message bundle, define a const array MESSAGES.
+ * By default, looks on MessageRegistry for message bundles.
+ * To provide a fallback message bundle,
+ *  define a const array MESSAGES like [$key => $format, ...]
  */
 trait MakesMessages {
 
@@ -42,7 +44,7 @@ trait MakesMessages {
   public static function messageBundle() : MessageBundle {
     if (defined("static::MESSAGES")) {
       if (! is_array(static::MESSAGES)) {
-        MessageError::E::BAD_MESSAGES_CONST->throw(["type" => get_debug_type(static::MESSAGES)]);
+        throw (MessageError::BadMessages)(["type" => get_debug_type(static::MESSAGES)]);
       }
 
       return new MessageBundle(static::MESSAGES);

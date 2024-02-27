@@ -72,8 +72,9 @@ class MessageRegistry {
   }
 
   /**
-   * Looks up and formats the message identified by key, using the given locale and context.
+   * Looks up and formats the message identified by key, using the given bundle, locale, and context.
    *
+   * @param ResourceBundle The messages bundle to look up from
    * @param string $key Dot-delimited key path to target message
    * @param array $context Contextual replacements
    * @param ?string $locale Target message locale
@@ -82,7 +83,7 @@ class MessageRegistry {
    */
   public static function messageFrom(ResourceBundle $messages, string $key, array $context, string $locale = null) : ? string {
     $locale ??= static::$defaultLocale ?? static::ROOT_LOCALE;
-    $format = static::findFormatIn($messages, $locale);
+    $format = static::findFormatIn($messages, $key);
     if (empty($format)) {
       return null;
     }
@@ -102,7 +103,7 @@ class MessageRegistry {
   protected static function findFormat(string $key, string $locale) : ? string {
     if (! empty(static::$messages)) {
       foreach (static::$messages[$locale] ?? reset(static::$messages) as $messages) {
-        $format = static::findFormatIn($messages, $locale);
+        $format = static::findFormatIn($messages, $key);
         if (isset($format)) {
           return $format;
         }
@@ -130,7 +131,8 @@ class MessageRegistry {
 
       $message = $message->get($next);
     }
-    if (! is_string($message)) {
+    // null means not found; not string means we found something but it's not a message
+    if ($message !== null && ! is_string($message)) {
       throw (MessageError::NotAMessage)(["bundle" => $messages::class, "key" => $key]);
     }
 
@@ -147,7 +149,7 @@ class MessageRegistry {
    * @return string|null Formatted message on success
    */
   protected static function formatMessage(string $locale, string $format, array $context) : ? string {
-    $formatter = new MessageFormatter($locale, $format);
+    $formatter = static::messageFormatter($locale, $format);
     return $formatter->format($context) ?:
       throw (MessageError::FormatFailed)([
         "error_code" => $formatter->getErrorCode(),
@@ -156,5 +158,16 @@ class MessageRegistry {
         "format" => $format,
         "context" => $context
       ]);
+  }
+
+  /**
+   * Factory: gets the MessageFormatter instance to use.
+   *
+   * @param string $locale Target message locale
+   * @param string $format Message formatting string
+   * @return MessageFormatter
+   */
+  protected static function messageFormatter(string $locale, string $format) : MessageFormatter {
+    return new MessageFormatter($locale, $format);
   }
 }

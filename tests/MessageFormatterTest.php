@@ -23,12 +23,12 @@ namespace at\peekaboo\tests;
 use at\peekaboo\MessageFormatter;
 use at\peekaboo\tests\TestCase;
 
+require_once __DIR__ . "/../stubs/MessageFormatter.php";
+
 /** Tests for the MessageFormatter class. */
 class MessageFormatterTest extends TestCase {
 
-  /**
-   * @dataProvider formatTestProvider
-   */
+  /** @dataProvider formatTestProvider */
   public function testFormat(string $format, array $context, string $expected) {
     $this->assertSame(
       $expected,

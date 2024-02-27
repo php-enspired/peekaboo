@@ -38,6 +38,7 @@
   "scripts": {
     "build:dist": "bin/build-dist",
     "build:locales": "genrb resources/language/*.txt -d resources/language/",
+    "build:test:locales": "genrb tests/resources/*.txt -d tests/resources/",
     "test:analyze": "vendor/bin/phan",
     "test:unit" : "vendor/bin/phpunit tests",
     "wiki:update": "git subtree push --prefix docs wiki master",

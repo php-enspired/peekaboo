@@ -35,12 +35,12 @@ use PHPUnit\Framework\TestCase as PhpunitTestCase;
 abstract class TestCase extends PhpunitTestCase {
 
   /**
-   * Sets phpunit's expectException*() methods from an example ErrorCase.
+   * Sets phpunit's expectException*() methods from an example Error.
    *
-   * @param MessageErrorCase $case Error case the test expects to be thrown
+   * @param MessageError $e the Error expected to be thrown
    */
-  public function expectErrorCase(MessageErrorCase $case) : void {
-    $this->expectException(MessageError::class);
+  public function expectError(MessageError $case) : void {
+    $this->expectException(MessageException::class);
     $this->expectExceptionCode($case->value);
   }
 

@@ -27,6 +27,8 @@ namespace at\peekaboo;
  * This is a stub/fallback for internal usage when ext/intl is not loaded.
  * MessageFormatter->format() uses basic string substitution
  *  (locale and complex format instructions are ignored).
+ * If your project uses complex formatting, then you should ensure intl is available.
+ *
  * MessageFormatter->getErrorCode() and ->getErrorMessage() always tell you "unknown error."
  * Other methods are not emulated.
  *
