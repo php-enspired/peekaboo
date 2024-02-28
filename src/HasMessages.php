@@ -26,14 +26,17 @@ use at\peekaboo\MessageException;
  */
 interface HasMessages {
 
+  public const MESSAGES = [];
+
   /**
    * Finds and builds a message with the given key and context, if one exists.
    *
    * @param string $key Message identifier
    * @param array $context Contextual information for message replacements
+   * @param ?string $locale The locale to use for formatting
    * @throws MessageException MessageError::NoMessages if no matching message is found
    * @throws MessageException MessageError::NotAMessage if key is found but is not a formatting string
    * @return string Formatted message on success
    */
-  public function makeMessage(string $key, array $context) : string;
+  public function makeMessage(string $key, array $context = [], string $locale = null) : string;
 }

@@ -29,7 +29,6 @@
       "stubs/exceptable.php",
       "stubs/intl.php"
     ],
-    "psr-0": { "": "src/" },
     "psr-4": {
       "at\\peekaboo\\": "src/",
       "at\\peekaboo\\tests\\": "tests/"

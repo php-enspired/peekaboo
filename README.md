@@ -11,6 +11,7 @@ dependencies
 Requires php 8.1 or later.
 
 ICU support requires the `intl` extension.
+Building ICU resource bundles uses `genrb`.
 
 installation
 ------------
@@ -20,7 +21,12 @@ Recommended installation method is via [Composer](https://getcomposer.org/): sim
 docs
 ----
 
-…coming soon
+- API:
+  - [`HasMessages`](https://github.com/php-enspired/peekaboo/wiki/Api:-HasMessages)
+  - [`MakesMessages`](https://github.com/php-enspired/peekaboo/wiki/Api:-MakesMessages)
+  - [`MessageRegistry`](https://github.com/php-enspired/peekaboo/wiki/Api:-MessageRegistry)
+- [Basic Usage](https://github.com/php-enspired/peekaboo/wiki/Usage:-Basics)
+- [Message Errors](https://github.com/php-enspired/peekaboo/wiki/Usage:-Message-Errors)
 
 tests
 -----

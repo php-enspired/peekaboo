@@ -48,7 +48,7 @@ enum MessageError : int implements Error {
       "locale: {locale}\n" .
       "format: {format}\n" .
       "context: {context}",
-    self::BadMessages->name => "MakesMessages::MESSAGES must be an array; {type} declared"
+    self::BadMessages->name => "MakesMessages::MESSAGES must be an array of message formats; {type} declared"
   ];
 
   public function __invoke(array $context = [], Throwable $previous = null) : Exceptable {
@@ -61,6 +61,7 @@ enum MessageError : int implements Error {
 
   public function message(array $context) : string {
     $f = self::MESSAGES[$this->name];
+    $r = [];
     foreach ($context as $k => $v) {
       $r["{{$k}}"] = $v;
     }

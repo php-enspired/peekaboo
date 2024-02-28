@@ -38,19 +38,8 @@ class MessageRegistry {
   /** @var string|null The default locale to use for message lookups/formatting. */
   public static ? string $defaultLocale = null;
 
-  /** @var array Available message bundles, grouped by locale. */
+  /** @var array Available message bundles, grouped by name. */
   protected static array $messages = [];
-
-  /**
-   * Sets up a resource bundle for a given locale.
-   * If no default locale/bundle is registered, the first-registered locale+bundle will be used.
-   *
-   * @param string $locale Preferred locale
-   * @param ?ResourceBundle $messages Message format patterns
-   */
-  public static function localize(string $locale, ResourceBundle $messages = null) : void {
-    static::$messages[$locale][] = $messages;
-  }
 
   /**
    * Looks up and formats the message identified by key, using the given locale and context.
@@ -58,12 +47,18 @@ class MessageRegistry {
    * @param string $key Dot-delimited key path to target message
    * @param array $context Contextual replacements
    * @param ?string $locale Target message locale
+   * @param string $group Prefered message bundle to use
    * @throws MessageException MessageError::FormatFailed on error
    * @return string|null Formatted message on success
    */
-  public static function message(string $key, array $context, string $locale = null) : ? string {
+  public static function message(
+    string $key,
+    array $context,
+    string $locale = null,
+    string $group = ""
+  ) : ? string {
     $locale ??= static::$defaultLocale ?? static::ROOT_LOCALE;
-    $format = static::findFormat($key, $locale);
+    $format = static::findFormat($key, $group);
     if (empty($format)) {
       return null;
     }
@@ -74,14 +69,19 @@ class MessageRegistry {
   /**
    * Looks up and formats the message identified by key, using the given bundle, locale, and context.
    *
-   * @param ResourceBundle The messages bundle to look up from
+   * @param ResourceBundle $messages The messages bundle to look up from
    * @param string $key Dot-delimited key path to target message
    * @param array $context Contextual replacements
    * @param ?string $locale Target message locale
    * @throws MessageException MessageError::FormatFailed on error
    * @return string|null Formatted message on success
    */
-  public static function messageFrom(ResourceBundle $messages, string $key, array $context, string $locale = null) : ? string {
+  public static function messageFrom(
+    ResourceBundle $messages,
+    string $key,
+    array $context,
+    string $locale = null
+  ) : ? string {
     $locale ??= static::$defaultLocale ?? static::ROOT_LOCALE;
     $format = static::findFormatIn($messages, $key);
     if (empty($format)) {
@@ -92,20 +92,48 @@ class MessageRegistry {
   }
 
   /**
+   * Adds a resource bundle to the registry.
+   *
+   * @param ResourceBundle $messages Message format patterns
+   * @param string $name An label for grouping these messages
+   */
+  public static function register(ResourceBundle $messages, string $name = "") : void {
+    static::$messages[$name][] = $messages;
+  }
+
+  /**
+   * Removes a resource bundle from the registry.
+   *
+   * @param ResourceBundle $messages Message format patterns
+   * @param string $name An label for grouping these messages
+   */
+  public static function unregister(ResourceBundle $messages, string $name = "") : void {
+    if (isset(static::$messages[$name])) {
+      $index = array_search($messages, static::$messages[$name], true);
+      if ($index !== false) {
+        unset(static::$messages[$name][$index]);
+      }
+    }
+  }
+
+  /**
    * Finds a message format string for the given locale.
    * Falls back on the root locale if needed.
    *
    * @param string $key Dot-delimited key path to target message
-   * @param string $locale Target message locale
+   * @param string $group Prefered message group
    * @throws MessageException MessageError::NotAMessage if key exists but is not a formatting string
    * @return string|null Formatting message if found; null otherwise
    */
-  protected static function findFormat(string $key, string $locale) : ? string {
-    if (! empty(static::$messages)) {
-      foreach (static::$messages[$locale] ?? reset(static::$messages) as $messages) {
-        $format = static::findFormatIn($messages, $key);
-        if (isset($format)) {
-          return $format;
+  protected static function findFormat(string $key, string $group) : ? string {
+    $groups = (empty($group)) ? [$group] : [$group, ""];
+    foreach ($groups as $name) {
+      if (! empty(static::$messages[$name])) {
+        foreach (static::$messages[$name] ?? reset(static::$messages) as $messages) {
+          $format = static::findFormatIn($messages, $key);
+          if (! empty($format)) {
+            return $format;
+          }
         }
       }
     }

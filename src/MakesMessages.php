@@ -19,6 +19,8 @@
 declare(strict_types = 1);
 namespace at\peekaboo;
 
+use ResourceBundle;
+
 use at\peekaboo\ {
   HasMessages,
   MessageBundle,
@@ -36,12 +38,16 @@ use at\peekaboo\ {
 trait MakesMessages {
 
   /**
-   * {@inheritDoc}
+   * Gets a default/fallback ResourceBundle for this class.
+   *
+   * By default, builds a MessageBundle from the MESSAGES const, if defined.
    *
    * We check before referencing.
    * @phan-suppress PhanUndeclaredConstantOfClass
+   *
+   * @return ResourceBundle
    */
-  public static function messageBundle() : MessageBundle {
+  public static function messageBundle() : ResourceBundle {
     if (defined("static::MESSAGES")) {
       if (! is_array(static::MESSAGES)) {
         throw (MessageError::BadMessages)(["type" => get_debug_type(static::MESSAGES)]);
@@ -54,12 +60,12 @@ trait MakesMessages {
   }
 
   /** {@inheritDoc} */
-  public function makeMessage(string $key, array $context) : string {
+  public function makeMessage(string $key, array $context = [], string $locale = null) : string {
     assert($this instanceof HasMessages);
     $context = $this->prepFormattingContext($context);
     $registry = $this->messageRegistry();
-    return $registry::message($key, $context) ??
-      $registry::messageFrom(static::messageBundle(), $key, $context) ??
+    return $registry::message($key, $context, $locale) ??
+      $registry::messageFrom(static::messageBundle(), $key, $context, $locale) ??
       throw (MessageError::NoMessages)([
         "registry" => $registry::class,
         "class" => static::class,

@@ -112,10 +112,6 @@ class MakesMessagesTest extends TestCase {
     }
   }
 
-  public function tearDown() : void {
-    $this->setNonpublicStaticProperty(MessageRegistry::class, 'messages', []);
-  }
-
   /** @dataProvider messageFormattingProvider */
   public function testMessageFormatting(
     string $key,
@@ -130,12 +126,15 @@ class MakesMessagesTest extends TestCase {
     );
 
     if (extension_loaded("intl")) {
-      MessageRegistry::localize("root", self::$bundle);
+      MessageRegistry::register(self::$bundle);
+
       $this->assertSame(
         $expectedIntl,
         self::$instance->makeMessage($key, $context),
         "intl message"
       );
+
+      MessageRegistry::unregister(self::$bundle);
     }
   }
 
