@@ -26,6 +26,7 @@ use at\peekaboo\MessageException;
  */
 interface HasMessages {
 
+  /** @internal */
   public const MESSAGES = [];
 
   /**

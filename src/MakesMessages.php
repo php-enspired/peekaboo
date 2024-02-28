@@ -42,21 +42,19 @@ trait MakesMessages {
    *
    * By default, builds a MessageBundle from the MESSAGES const, if defined.
    *
-   * We check before referencing.
+   * We check before referencing (it's defined on the interface).
    * @phan-suppress PhanUndeclaredConstantOfClass
    *
+   * @throws MessageException MessageError::BadMessages if MESSAGES is not an array
    * @return ResourceBundle
    */
   public static function messageBundle() : ResourceBundle {
-    if (defined("static::MESSAGES")) {
-      if (! is_array(static::MESSAGES)) {
-        throw (MessageError::BadMessages)(["type" => get_debug_type(static::MESSAGES)]);
-      }
-
-      return new MessageBundle(static::MESSAGES);
+    assert(is_a(static::class, HasMessages::class, true));
+    if (! is_array(static::MESSAGES)) {
+      throw (MessageError::BadMessages)(["type" => get_debug_type(static::MESSAGES)]);
     }
 
-    return new MessageBundle([]);
+    return new MessageBundle(static::MESSAGES);
   }
 
   /** {@inheritDoc} */

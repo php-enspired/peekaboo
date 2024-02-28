@@ -56,7 +56,7 @@ class MessageBundle extends ResourceBundle {
    */
   public function get($key, bool $fallback = true) : mixed {
     if (isset($this->messages[$key])) {
-      if (is_string($this->messages[$key])) {
+      if (is_scalar($this->messages[$key])) {
         return $this->messages[$key];
       }
 
