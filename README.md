@@ -18,6 +18,26 @@ installation
 
 Recommended installation method is via [Composer](https://getcomposer.org/): simply `composer require php-enspired/peekaboo`.
 
+examples
+--------
+
+```php
+use at\peekaboo\ {
+  HasMessages,
+  MakesMessages
+};
+
+class Foo implements HasMessages {
+  use MakesMessages;
+
+  public const MESSAGES = [
+    "welcome" => "welcome to the {place}, we've got fun and games"
+  ];
+}
+
+echo (new Foo())->makeMessage("welcome", ["place" => "jungle"]);
+```
+
 docs
 ----
 
