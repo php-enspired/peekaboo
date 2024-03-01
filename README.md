@@ -18,8 +18,8 @@ installation
 
 Recommended installation method is via [Composer](https://getcomposer.org/): simply `composer require php-enspired/peekaboo`.
 
-examples
---------
+for starters
+------------
 
 ```php
 use at\peekaboo\ {
@@ -36,6 +36,7 @@ class Foo implements HasMessages {
 }
 
 echo (new Foo())->makeMessage("welcome", ["place" => "jungle"]);
+// welcome to the jungle, we've got fun and games
 ```
 
 docs
