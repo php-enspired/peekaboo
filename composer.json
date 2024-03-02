@@ -25,10 +25,6 @@
     "phan/phan": "^5.4.3"
   },
   "autoload": {
-    "files": [
-      "stubs/exceptable.php",
-      "stubs/intl.php"
-    ],
     "psr-4": {
       "at\\peekaboo\\": "src/",
       "at\\peekaboo\\tests\\": "tests/"

@@ -19,8 +19,8 @@
 declare(strict_types = 1);
 namespace at\peekaboo;
 
-// If intl is not loaded, PSR-0 will find a stub version.
 use ResourceBundle;
+require_once __DIR__ . "/../stubs/intl.php";
 
 /**
  * A ResourceBundle-compatible that takes messages from an array.

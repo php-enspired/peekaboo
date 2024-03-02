@@ -24,6 +24,7 @@ use at\exceptable\ {
   Error,
   Exceptable
 };
+require_once __DIR__ . "/../stubs/exceptable.php";
 
 use at\peekaboo\ {
   MakesMessages,

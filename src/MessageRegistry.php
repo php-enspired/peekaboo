@@ -21,6 +21,7 @@ namespace at\peekaboo;
 
 use MessageFormatter,
   ResourceBundle;
+require_once __DIR__ . "/../stubs/intl.php";
 
 use at\peekaboo\MessageError;
 

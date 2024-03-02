@@ -20,6 +20,7 @@ declare(strict_types = 1);
 namespace at\peekaboo;
 
 use ResourceBundle;
+require_once __DIR__ . "/../stubs/intl.php";
 
 use at\peekaboo\ {
   HasMessages,

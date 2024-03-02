@@ -19,5 +19,6 @@
 namespace at\peekaboo;
 
 use at\exceptable\Spl\RuntimeException;
+require_once __DIR__ . "/../stubs/exceptable.php";
 
 class MessageException extends RuntimeException {}
