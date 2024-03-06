@@ -66,7 +66,7 @@ trait MakesMessages {
     return $registry::message($key, $context, $locale) ??
       $registry::messageFrom(static::messageBundle(), $key, $context, $locale) ??
       throw (MessageError::NoMessages)([
-        "registry" => $registry::class,
+        "registry" => $registry,
         "class" => static::class,
         "key" => $key
       ]);

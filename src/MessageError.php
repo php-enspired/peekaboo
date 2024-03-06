@@ -60,6 +60,10 @@ enum MessageError : int implements Error {
     return $this->value;
   }
 
+  public function exceptableType() : string {
+    return MessageException::class;
+  }
+
   public function message(array $context) : string {
     $f = self::MESSAGES[$this->name];
     $r = [];

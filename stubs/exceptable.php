@@ -35,7 +35,7 @@ namespace at\exceptable {
 
   use at\peekaboo\HasMessages;
 
-  if (! class_exists(Error::class, true)) {
+  if (! interface_exists(Error::class, true)) {
 
     /** @see Error */
     interface Error extends HasMessages {
@@ -46,7 +46,7 @@ namespace at\exceptable {
     }
   }
 
-  if (! class_exists(Exceptable::class, true)) {
+  if (! interface_exists(Exceptable::class, true)) {
 
     /** @see Exceptable */
     interface Exceptable extends Throwable {
