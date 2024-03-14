@@ -145,12 +145,16 @@ class MessageRegistry {
   /**
    * Finds a message format string in a message bundle.
    *
+   * Converts backslashes in keys to underscores.
+   * This is done to support the use of (namespaced) classnames in keys.
+   *
    * @param ResourceBundle $messages The message bundle to look in
    * @param string $key Dot-delimited key path to target message
    * @throws MessageException MessageError::NotAMessage if key exists but is not a formatting string
    * @return string|null Formatting message if found; null otherwise
    */
   protected static function findFormatIn(ResourceBundle $messages, string $key) : ? string {
+    $key = strtr($key, ["\\" =>"_"]);
     $message = $messages;
     foreach (explode(".", $key) as $next) {
       // more keys but no more message bundles means not found

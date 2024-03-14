@@ -30,13 +30,18 @@ require_once __DIR__ . "/../stubs/intl.php";
  *  and even when intl _is_ available, some native ResourceBundle methods will error if used.
  * Users are very strongly advised to rely only on the methods defined here.
  *
- * Only defined if ext/intl isn't loaded.
+ * Converts backslashes in message keys to underscores.
+ * This is done to support the use of (namespaced) classnames in keys.
+ *
+ * false positive: ResourceBundle is only defined if ext/intl isn't loaded.
  * @phan-suppress PhanRedefinedExtendedClass
  */
 class MessageBundle extends ResourceBundle {
 
   /** @param array $messages A map of message formats. */
-  public function __construct(protected array $messages) {}
+  public function __construct(protected array $messages) {
+    $this->messages = $this->rekey($messages);
+  }
 
   /**
    * Counts (top-level) message keys in this bundle.
@@ -55,6 +60,7 @@ class MessageBundle extends ResourceBundle {
    * @return string|MessageBundle|null Message or Bundle at key if exists; null otherwise
    */
   public function get($key, bool $fallback = true) : mixed {
+    $key = strtr($key, ["\\" => "_"]);
     if (isset($this->messages[$key])) {
       if (is_scalar($this->messages[$key])) {
         return $this->messages[$key];
@@ -66,5 +72,16 @@ class MessageBundle extends ResourceBundle {
     }
 
     return null;
+  }
+
+  protected function rekey(array $messages) : array {
+    $rekeyed = [];
+    foreach ($messages as $key => $value) {
+      $rekeyed[strtr($key, ["\\" => "_"])] = is_array($value) ?
+        $this->rekey($value) :
+        $value;
+    }
+
+    return $rekeyed;
   }
 }

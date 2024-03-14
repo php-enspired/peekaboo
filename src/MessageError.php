@@ -64,7 +64,7 @@ enum MessageError : int implements Error {
     return MessageException::class;
   }
 
-  public function message(array $context) : string {
+  public function message(array $context = []) : string {
     $f = self::MESSAGES[$this->name];
     $r = [];
     foreach ($context as $k => $v) {
