@@ -3,7 +3,7 @@
   "description": "message formatting utilities using ICU, with a fallback on basic string templating.",
   "type": "library",
   "homepage": "http://php.enspi.red",
-  "license": "GPL-3.0-only",
+  "license": "MPL-2.0",
   "authors": [
     {
       "name": "Adrian",
