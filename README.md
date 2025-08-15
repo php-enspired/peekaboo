@@ -1,4 +1,4 @@
-![](https://img.shields.io/github/release/php-enspired/peekaboo.svg)  ![](https://img.shields.io/badge/PHP-8.3-blue.svg?colorB=8892BF)  ![](https://img.shields.io/badge/license-GPL_3.0_only-blue.svg)
+![](https://img.shields.io/github/release/php-enspired/peekaboo.svg)  ![](https://img.shields.io/badge/PHP-8.3-blue.svg?colorB=8892BF)  ![](https://img.shields.io/badge/license-MPL.2.0-orange.svg)
 
 peekaboo! (ICU)
 ===============
