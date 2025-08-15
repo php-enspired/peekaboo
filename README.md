@@ -119,7 +119,7 @@ enum Woo : string implements EnumeratesMessages {
   case Welcome = "Welcome to the {place}, we've got fun and games";
 }
 
-Woo::Welcome->message("foo.welcome", ["place" => "jungle"]);
+Woo::Welcome->message(["place" => "jungle"]);
 // Welcome to the jungle, we've got fun and games
 ```
 This is a subtle difference, but is worth calling out: when you use `EnumeratesMessages->message()`, peekaboo _does not look up messages_ in the registry. It will only use the message format declared on the enum. The `->makeMessage()` method is still available, though: this method _will_ use the message registry, and will fall back on using `->message()` if no message is found in the registry.
