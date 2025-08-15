@@ -18,7 +18,9 @@
     "source": "https://github.com/php-enspired/peekaboo"
   },
   "require": {
-    "php": "^8.1"
+    "php": "^8.3",
+    "php-enspired/exceptable": "6.0",
+    "php-enspired/at_shared_exceptable": "1.0"
   },
   "suggest": {
     "ext-intl": "provides support for ICU formatting and message bundle support"
@@ -34,11 +36,8 @@
     }
   },
   "scripts": {
-    "build:dist": "bin/build-dist",
-    "build:locales": "genrb resources/language/*.txt -d resources/language/",
-    "build:test:locales": "genrb tests/resources/*.txt -d tests/resources/",
-    "test:analyze": "vendor/bin/phan",
-    "test:unit" : "vendor/bin/phpunit tests",
+    "test:analyze": "composer -q --working-dir vendor/php-enspired/at_shared_exceptable install && composer --working-dir vendor/php-enspired/at_shared_exceptable test:analyze",
+    "test:unit": "composer -q --working-dir vendor/php-enspired/at_shared_exceptable install && composer --working-dir vendor/php-enspired/at_shared_exceptable peekaboo:test:unit",
     "wiki:update": "git subtree push --prefix docs wiki master",
     "wiki:update-docs": "git subtree pull --prefix docs wiki master --squash --message='Merge wiki updates into docs'"
   }
