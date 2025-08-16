@@ -146,7 +146,7 @@ If you are using a version of this software licensed under the GPLv3, and would 
 tests
 -----
 
-Run static analysis with `composer test:analyze` and tun unit tests with `composer test:unit`.
+Run static analysis with `composer test:analyze` and run unit tests with `composer test:unit`.
 
 Note, the first time you run a `test:` command, dev dependencies will be installed automatically. This requires an internet connection and may take some time.
 
